@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HubDevice.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HubDevice.Controllers;
 
@@ -12,22 +13,35 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    private readonly IWeatherForecastService _weatherForecastService;
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IWeatherForecastService weatherForecastService)
     {
         _logger = logger;
+        _weatherForecastService = weatherForecastService;
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpGet]
+    public async Task<IActionResult> GetForecast([FromQuery] string key)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var redisCustomerList = await _weatherForecastService.GetForecast(key);
+
+        return Ok(redisCustomerList);
     }
+    [HttpPost]
+    public async Task<IActionResult> AddForecast([FromRoute] string key, [FromRoute] string value)
+    {
+        await _weatherForecastService.AddForecast(key, value);
+
+        return Ok();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> DeleteForecast([FromRoute] string key)
+    {
+        await _weatherForecastService.DeleteForecast(key);
+
+        return Ok();
+    }
+
 }
 
