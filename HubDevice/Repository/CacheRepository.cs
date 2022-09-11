@@ -12,6 +12,7 @@ namespace HubDevice.Repository
     // .net stackexchange redis Basis Documentation https://stackexchange.github.io/StackExchange.Redis/Basics
     // return types in redis https://stackoverflow.com/questions/37953019/wrongtype-operation-against-a-key-holding-the-wrong-kind-of-value-php 
 
+    //TODO add distributed caching
     public class CacheRepository : ICacheRepository
     {
         private readonly IDatabase _cache;

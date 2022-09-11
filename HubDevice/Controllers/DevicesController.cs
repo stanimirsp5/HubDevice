@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
+using HubDevice.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
 
 namespace HubDevice.Controllers
@@ -8,12 +10,22 @@ namespace HubDevice.Controllers
     public class DevicesController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        public DevicesController(IConfiguration configuration)
+        private readonly hubdeviceContext _hubDeviceContext;
+        public DevicesController(IConfiguration configuration, hubdeviceContext hubDeviceContext)
         {
+            _hubDeviceContext = hubDeviceContext;
             _configuration = configuration;
         }
 
+        [HttpGet("get-all")]
+        public JsonResult GetFromDb()
+        {
+            var devices = _hubDeviceContext.Devices.First();
 
+            return new JsonResult(devices);
+        }
+
+        [HttpGet]
         public JsonResult Get()
         {
             string query = @"select * from WeatherDevice";
@@ -35,7 +47,6 @@ namespace HubDevice.Controllers
             }
 
             return new JsonResult(table);
-
         }
     }
 }

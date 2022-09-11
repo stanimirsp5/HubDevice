@@ -1,10 +1,14 @@
-﻿using HubDevice.Repository;
+﻿using HubDevice.Data;
+using HubDevice.Repository;
 using HubDevice.Services;
 using HubDevice.Services.Interfaces;
 using Newtonsoft.Json.Serialization;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
-
+ConfigurationManager configuration = builder.Configuration;
 // Add services to the container.
 //Enable CORS
 builder.Services.AddCors(c =>
@@ -16,9 +20,17 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = "localhost:6379";
 });
 //JSON Serializer
-//builder.Services.AddControllersWithViews().AddNewtonsoftJson(opt =>
-//    opt.Ser
-//    );
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson(opt =>
+    opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+    .AddNewtonsoftJson(opt =>
+    opt.SerializerSettings.ContractResolver = new DefaultContractResolver());
+
+builder.Services.AddDbContext<hubdeviceContext>(opt =>
+
+    opt.UseNpgsql(configuration.GetConnectionString("HubAppCon"))
+);
+//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
